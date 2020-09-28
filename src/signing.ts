@@ -27,11 +27,15 @@ export async function signApkFile(
 
     // Align the apk file
     const alignedApkFile = apkFile.replace('.apk', '-aligned.apk');
-    await exec.exec(`"${zipAlign}"`, [
+    let exitCode = await exec.exec(`"${zipAlign}"`, [
         '-v', '4',
         apkFile,
         alignedApkFile
     ]);
+
+    if (exitCode !== 0) {
+        core.error(`Failed to create zipaligned apk ${alignedApkFile}!`);
+    }
 
     core.debug("Signing APK file");
 
@@ -43,6 +47,9 @@ export async function signApkFile(
     const signedApkFile = apkFile.replace('-unsigned.apk', '.apk');
     const args = [
         'sign',
+        '--v1-signing-enabled true',
+        '--v2-signing-enabled true',
+        '--v3-signing-enabled false',
         '--ks', signingKeyFile,
         '--ks-key-alias', alias,
         '--ks-pass', `pass:${keyStorePassword}`,
@@ -54,14 +61,23 @@ export async function signApkFile(
     }
     args.push(alignedApkFile);
 
-    await exec.exec(`"${apkSigner}"`, args);
+    exitCode = await exec.exec(`"${apkSigner}"`, args);
+
+    if (exitCode !== 0) {
+        core.error(`Failed to create signed apk ${signedApkFile}!`);
+    }
 
     // Verify
     core.debug("Verifying Signed APK");
-    await exec.exec(`"${apkSigner}"`, [
+    exitCode = await exec.exec(`"${apkSigner}"`, [
         'verify',
-        signedApkFile
+        signedApkFile,
+        '> /dev/null 2>&1'
     ]);
+
+    if (exitCode !== 0) {
+        core.error(`Signature verification failed for apk ${signedApkFile}!`);
+    }
 
     return signedApkFile
 }
