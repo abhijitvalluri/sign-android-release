@@ -30,7 +30,8 @@ export async function signApkFile(
     let exitCode = await exec.exec(`"${zipAlign}"`, [
         '-v', '4',
         apkFile,
-        alignedApkFile
+        alignedApkFile,
+        '> /dev/null 2>&1'
     ]);
 
     if (exitCode !== 0) {
@@ -78,6 +79,10 @@ export async function signApkFile(
     if (exitCode !== 0) {
         core.error(`Signature verification failed for apk ${signedApkFile}!`);
     }
+
+    // All went well! Delete unsigned and aligned apks.
+    await exec.exec('rm', ['-f', alignedApkFile]);
+    await exec.exec('rm', ['-f', apkFile]);
 
     return signedApkFile
 }

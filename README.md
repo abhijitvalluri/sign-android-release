@@ -48,7 +48,7 @@ a comma delimited string as well just like above.
 ## Example usage
 
 ```yaml
-uses: abhijitvalluri/sign-apks@v1
+uses: abhijitvalluri/sign-apks@v0.2
 with:
   releaseDirectory: app/build/outputs/apk/release
   signingKeyBase64: ${{ secrets.SIGNING_KEY }}
