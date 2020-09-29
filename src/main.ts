@@ -27,6 +27,7 @@ async function run() {
       let signedReleaseFiles = Array()
       for (let releaseFile of releaseFiles) {
         core.debug(`Found release to sign: ${releaseFile.name}`);
+        console.log(`Processing apk ${releaseFile.name}`);
         const releaseFilePath = path.join(releaseDir, releaseFile.name);
         let signedReleaseFile = '';
         if (releaseFile.name.endsWith('.apk')) {
@@ -41,11 +42,14 @@ async function run() {
         core.debug('Release signed! Setting outputs.');
         signedReleaseFiles.push(signedReleaseFile);
       }
+
+      const execOptions = {};
+      execOptions["silent"] = true;
+      await execute.exec('rm', ['-f', signingKey], execOptions);
+
       core.exportVariable('SIGNED_RELEASE_FILE', signedReleaseFiles.join(", "));
       core.setOutput('signedReleaseFile', signedReleaseFiles.join(", "));
       console.log('Releases signed!');
-
-      await execute.exec('rm', ['-f', signingKey]);
     } else {
       core.error("No release files (.apk or .aab) could be found. Abort.");
       core.setFailed('No release files (.apk or .aab) could be found.');

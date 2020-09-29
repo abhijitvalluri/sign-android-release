@@ -29,6 +29,7 @@ export async function signApkFile(
     execOptions["silent"] = true;
 
     // Align the apk file
+    console.log('Zipaligning apk');
     const alignedApkFile = apkFile.replace('.apk', '-aligned.apk');
     let exitCode = await exec.exec(`"${zipAlign}"`, [
         '-v', '4',
@@ -64,6 +65,7 @@ export async function signApkFile(
     }
     args.push(alignedApkFile);
 
+    console.log('Signing apk');
     exitCode = await exec.exec(`"${apkSigner}"`, args, execOptions);
 
     if (exitCode !== 0) {
@@ -72,6 +74,7 @@ export async function signApkFile(
 
     // Verify
     core.debug("Verifying Signed APK");
+    console.log('Verifying signed apk');
     exitCode = await exec.exec(`"${apkSigner}"`, [
         'verify',
         signedApkFile
@@ -82,8 +85,9 @@ export async function signApkFile(
     }
 
     // All went well! Delete unsigned and aligned apks.
-    await exec.exec('rm', ['-f', alignedApkFile]);
-    await exec.exec('rm', ['-f', apkFile]);
+    console.log('Cleaning up intermediate apks');
+    await exec.exec('rm', ['-f', alignedApkFile], execOptions);
+    await exec.exec('rm', ['-f', apkFile], execOptions);
 
     return signedApkFile
 }
