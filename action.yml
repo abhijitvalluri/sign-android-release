@@ -1,9 +1,9 @@
-name: 'Sign Android release'
+name: 'Sign apks'
 description: 'An action to sign an Android release APK or AAB'
-author: 'r0adkll'
+author: 'abhijitvalluri'
 branding:
-  icon: 'edit'
-  color: 'orange'
+  icon: 'shield'
+  color: 'green'
 inputs:
   releaseDirectory:
     description: 'The directory to find your release to sign'

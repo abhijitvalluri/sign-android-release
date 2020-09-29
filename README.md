@@ -1,6 +1,8 @@
-# Sign Android Release Action
+# Sign apks Action
 
 This action will help you sign an Android `.apk` or `.aab` (Android App Bundle) file for release.
+
+NOTE: This action is still in development and not finalized. As such, do not rely on this to work properly for your workflows!
 
 ## Inputs
 
@@ -46,7 +48,7 @@ a comma delimited string as well just like above.
 ## Example usage
 
 ```yaml
-uses: r0adkll/sign-android-release@v1
+uses: abhijitvalluri/sign-apks@v1
 with:
   releaseDirectory: app/build/outputs/apk/release
   signingKeyBase64: ${{ secrets.SIGNING_KEY }}
