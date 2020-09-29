@@ -30,8 +30,7 @@ export async function signApkFile(
     let exitCode = await exec.exec(`"${zipAlign}"`, [
         '-v', '4',
         apkFile,
-        alignedApkFile,
-        '> /dev/null 2>&1'
+        alignedApkFile
     ]);
 
     if (exitCode !== 0) {
@@ -72,8 +71,7 @@ export async function signApkFile(
     core.debug("Verifying Signed APK");
     exitCode = await exec.exec(`"${apkSigner}"`, [
         'verify',
-        signedApkFile,
-        '> /dev/null 2>&1'
+        signedApkFile
     ]);
 
     if (exitCode !== 0) {
