@@ -25,20 +25,33 @@ export async function signApkFile(
     const zipAlign = path.join(buildTools, 'zipalign');
     core.debug(`Found 'zipalign' @ ${zipAlign}`);
 
+    let execStdOutput = '';
+    let execErrorOutput = '';
     const execOptions = {};
     execOptions["silent"] = true;
+    execOptions["listeners"] = {
+        stdout: (data: Buffer) => {
+            execStdOutput += data.toString();
+        },
+        stderr: (data: Buffer) => {
+            execErrorOutput += "\n" + data.toString();
+        }
+    };
 
     // Align the apk file
     console.log('Zipaligning apk');
     const alignedApkFile = apkFile.replace('.apk', '-aligned.apk');
-    let exitCode = await exec.exec(`"${zipAlign}"`, [
-        '-v', '4',
-        apkFile,
-        alignedApkFile
-    ], execOptions);
-
-    if (exitCode !== 0) {
-        core.error(`Failed to create zipaligned apk ${alignedApkFile}!`);
+    try {
+        await exec.exec(`"${zipAlign}"`, [
+            '-v', '4',
+            apkFile,
+            alignedApkFile
+        ], execOptions);
+    } catch(error) {
+        let message = `Failed to create zipaligned apk ${alignedApkFile}! ` + error.message;
+        core.error(message);
+        core.error(execErrorOutput);
+        throw new Error(message);
     }
 
     core.debug("Signing APK file");
@@ -51,7 +64,7 @@ export async function signApkFile(
     const signedApkFile = apkFile.replace('-unsigned.apk', '.apk');
     const args = [
         'sign',
-        '--v1-signing-enabled', 'true',
+        '--v1-signing-enabledsd true',
         '--v2-signing-enabled', 'true',
         '--v3-signing-enabled', 'false',
         '--ks', signingKeyFile,
@@ -66,22 +79,28 @@ export async function signApkFile(
     args.push(alignedApkFile);
 
     console.log('Signing apk');
-    exitCode = await exec.exec(`"${apkSigner}"`, args, execOptions);
-
-    if (exitCode !== 0) {
-        core.error(`Failed to create signed apk ${signedApkFile}!`);
+    try {
+        await exec.exec(`"${apkSigner}"`, args, execOptions);
+    } catch(error) {
+        let message = `Failed to create signed apk ${signedApkFile}! ` + error.message;
+        core.error(message);
+        core.error(execErrorOutput);
+        throw new Error(message);
     }
 
     // Verify
     core.debug("Verifying Signed APK");
     console.log('Verifying signed apk');
-    exitCode = await exec.exec(`"${apkSigner}"`, [
-        'verify',
-        signedApkFile
-    ], execOptions);
-
-    if (exitCode !== 0) {
-        core.error(`Signature verification failed for apk ${signedApkFile}!`);
+    try {
+        await exec.exec(`"${apkSigner}"`, [
+            'verify',
+            signedApkFile
+        ], execOptions);
+    } catch(error) {
+        let message = `Signature verification failed for apk ${signedApkFile}! ` + error.message;
+        core.error(message);
+        core.error(execErrorOutput);
+        throw new Error(message);
     }
 
     // All went well! Delete unsigned and aligned apks.
