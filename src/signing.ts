@@ -64,7 +64,7 @@ export async function signApkFile(
     const signedApkFile = apkFile.replace('-unsigned.apk', '.apk');
     const args = [
         'sign',
-        '--v1-signing-enabledsd true',
+        '--v1-signing-enabledasdtrue',
         '--v2-signing-enabled', 'true',
         '--v3-signing-enabled', 'false',
         '--ks', signingKeyFile,
